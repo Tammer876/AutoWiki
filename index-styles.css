@@ -1,0 +1,65 @@
+.top-bar, .bottom-bar{
+  background: #c20a0a;
+  padding: 0.5rem;
+}
+
+.bottom-bar{
+  position: absolute;
+  inset-block-start: 100%;
+  width: 100%;
+  height: 30px;
+  padding: 0.5rem 0;
+}
+
+.side-bar{
+  background-color: #e8720c;
+  width: 45px;
+  height: 100%;
+  position: absolute;
+  inset-inline-start: calc(100% - 45px);
+  inset-block-start: 45px;
+  z-index: -99;
+}
+
+.sticky{
+  position: sticky;
+  top: 0px;
+}
+
+.sign-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+  margin-right: 0.5em;
+}
+
+.sign-buttons button{
+  border: 2px solid black;
+  background: white;
+  margin: 0 0.25em;
+  width: 70px;
+  min-width: 70px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.divider{
+  height: 6px;
+  background: black;
+}
+
+.bottom-bar .divider{
+  position: relative;
+  top: -13px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  font-family: sans-serif;
+}
+  
+html{
+  box-sizing: border-box;
+}
