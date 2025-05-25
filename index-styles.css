@@ -32,7 +32,7 @@ td img{
   width: 120px; 
 }
 
-h1{
+.header-text h1{
   text-align: center; 
 }
 
@@ -71,7 +71,6 @@ html{
 .top-bar, .bottom-bar{
   background: #c20a0a;
   padding: 0.5rem;
-  
 }
 
 .bottom-bar{
@@ -100,11 +99,10 @@ html{
 }
 
 .sign-buttons button{
-  border: 2px solid black;
+  border: 3.5px solid black;
   background: white;
   margin: 0 0.25em;
-  width: 70px;
-  min-width: 70px;
+  width: 80px;
   font-size: 16px;
   text-align: center;
 }
