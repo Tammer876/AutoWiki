@@ -56,10 +56,23 @@ body {
   height: 100vh;
   font-family: sans-serif;
   overflow: hidden;
+
 }
 
 html{
   box-sizing: border-box;
+}
+
+/* link styling */
+
+a:link, a:visited, a:active{
+  color: black;
+  text-decoration: none;
+}
+
+a:hover{
+  color: #c20a0a;
+  text-decoration: none;
 }
 
 /* top, bottom and side bars */
