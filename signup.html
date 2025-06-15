@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="login-signup-styles.css" />
-    <title>Sing up for AutoWiki</title>
+    <title>Sign up for AutoWiki</title>
   </head>
   
   <body>
-  	<section class="top-bar">
+    <section class="top-bar">
       <h1>AutoWiki</h1>
     </section>
     <div class="divider"></div>
@@ -16,12 +16,12 @@
     <div class="side-bar"></div>
     
     <main>
-      <form>
+      <form id="registerForm" method="POST">
         <fieldset>
           <label for="nickname">       Login: <input id="nickname" name="nickname" type="text" required /></label>
           <label for="email">       Email: <input id="email" name="email" type="email" required /></label>
           <label for="password">Password: <input id="password" name="password" type="password" required /></label>
-          <label for="repeated-password">    Repeat: <input id="repeated-password" name="repeated-password" type="password" required /></label>
+          <label for="repeated-password">   Repeat:  <input id="repeated-password" name="repeated-password" type="password" required /></label>
           <input type="submit" value="Sign up" />
           <p><a href="login.html">Already have an account?</a></p>
         </fieldset>
@@ -31,6 +31,56 @@
     <section class="bottom-bar">
       <div class="divider"></div>
     </section>
+    <script>
+document.getElementById("registerForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
     
+    const backend_url = ("https://autowiki.uk/api")
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const repeatedPassword = document.getElementById("repeated-password").value;
+    const nickname = document.getElementById("nickname").value;
+
+   
+    if (password !== repeatedPassword) {
+        alert("Passwords don't match!");
+        return;
+    }
+
+    
+    if (!/[A-Z]/.test(password)) {
+        alert("The password must contain at least one capital letter!");
+        return;
+    }
+
+    try {
+        const response = await fetch(backend_url + "/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "accept": "application/json"
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password,
+                nickname: nickname,
+                role: "USER"  
+            }),
+        });
+
+        const responseText = await response.text();
+
+        if (response.ok) {
+            alert("Registration is successful! Check your email for confirmation.");
+            window.location.href = "/login.html";
+        } else {
+            alert("Error: " + responseText); 
+        }
+    } catch (error) {
+        console.error("Network error:", error);
+        alert("Server connection error");
+    }
+});
+</script>
   </body>
 </html>
