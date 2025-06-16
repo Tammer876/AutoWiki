@@ -1,0 +1,25 @@
+name: Deploy to production
+
+on:
+  push:
+    branches:
+      - main
+
+run-name: "Deploy to production ${{ github.ref_name }} triggered by @${{ github.actor }}"
+
+jobs:
+  deployment:
+    name: Deploy to production server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRODUCTION_PRIVATE_KEY }}
+
+      - name: SSH and Deploy
+        run: |
+          scp -o StrictHostKeyChecking=no -r ./ root@${{ secrets.PRODUCTION_IP }}::/var/www/html
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.PRODUCTION_IP }} << EOF
+            chown -R www-data:www-data /var/www/html
+          EOF
