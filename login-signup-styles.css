@@ -66,12 +66,12 @@ html{
 
 /* link styling */
 
-a:link, a:visited, a:active{
+p a:link, p a:visited, p a:active{
   color: black;
   text-decoration: none;
 }
 
-a:hover{
+p a:hover{
   color: #c20a0a;
   text-decoration: none;
 }
