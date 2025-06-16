@@ -9,7 +9,7 @@
   
   <body>
     <section class="top-bar">
-      <h1>AutoWiki</h1>
+      <h1><a href="index.html">AutoWiki</a></h1>
     </section>
     <div class="divider"></div>
     
@@ -72,7 +72,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
 
         if (response.ok) {
             alert("Registration is successful! Check your email for confirmation.");
-            window.location.href = "/login.html";
+            window.location.href = "\login.html";
         } else {
             alert("Error: " + responseText); 
         }

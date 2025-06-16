@@ -4,33 +4,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="index-styles.css" /> ////
+  <link rel="stylesheet" href="index-styles.css" />
   <title>AutoWiki - Your car wiki</title>
 </head>
 
 <body>
   <div class="sticky">
     <section class="top-bar">
-      <div class="sign-buttons">
-        <a href="login.html"><button>Log in</button></a>
-        <a href="signup.html"><button>Sign up</button></a>
+      <div class="sign-buttons" id="auth-buttons">
+        
       </div>
     </section>
     <div class="divider"></div>
   </div>
-    
+
   <div class="side-bar"></div>
-  
+
   <main>
     <header>
       <img src="stock-car-1.jpg" alt="red car image">
       <div class="header-text">
-        <h1>AutoWiki - Your car wiki</h1> 
+        <h1>AutoWiki - Your car wiki</h1>
         <p>AutoWiki is a new and efficent personal road vehicle database with robust searching and sorting functionality. It's creators are a group of first-year students united by love for programming and a wish <span class="mid-text-small">to get a good mark</span>. AutoWiki allows it's users to search and sort by any specs imaginable using our database! AutowikiDatabase is a product of sweat and tears of our datascientists, who pulled all-nighters just to make it a reality. Enjoy your search!</p>
       </div>
       <div class="divider"></div>
     </header>
-      
+
     <section>
       <table>
         <thead>
@@ -50,17 +49,41 @@
             <td>Example</td><td>3982 cm3</td><td>$218,400</td><td>5</td><td>760 Nm</td><td>Luxury Hatchback</td><td>Mercedes Benz</td><td><img src="stock-car-1.jpg" alt="car image"></td>
           </tr>
           <tr>
-          	<td>put-value-here</td><td>put-value-here</td><td>put-value-here</td><td>put-value-here</td><td>put-value-here</td><td>put-value-here</td><td>put-value-here</td><td><img src="put-image-here" alt="car image"></td>
+            <td>put-value-here</td><td>put-value-here</td><td>put-value-here</td><td>put-value-here</td><td>put-value-here</td><td>put-value-here</td><td>put-value-here</td><td><img src="put-image-here" alt="car image"></td>
           </tr>
         </tbody>
       </table>
     </section>
   </main>
-  
+
   <section class="bottom-bar">
     <div class="divider"></div>
   </section>
+
   
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const authButtons = document.getElementById("auth-buttons");
+      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+
+      if (isLoggedIn) {
+        authButtons.innerHTML = `
+          <button id="logoutBtn">Log out</button>
+        `;
+
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+          localStorage.removeItem("isLoggedIn");
+          location.reload();
+        });
+      } else {
+        authButtons.innerHTML = `
+          <a href="login.html"><button>Log in</button></a>
+          <a href="signup.html"><button>Sign up</button></a>
+        `;
+      }
+    });
+  </script>
+
 </body>
 
 </html>

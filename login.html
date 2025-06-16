@@ -1,35 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="login-signup-styles.css" />
-    <title>Log in AutoWiki</title>
-  </head>
-  
-  <body>
-  	<section class="top-bar">
-      <h1>AutoWiki</h1>
-    </section>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="login-signup-styles.css" />
+  <title>Log in AutoWiki</title>
+</head>
+
+<body>
+  <section class="top-bar">
+    <h1><a href="index.html">AutoWiki</a></h1>
+  </section>
+  <div class="divider"></div>
+
+  <div class="side-bar"></div>
+
+  <main>
+    <form id="loginForm">
+      <fieldset>
+        <label for="email">
+                Email:
+                <input id="email" name="email" type="email" required />
+        </label>
+        <label for="password">
+                Password:
+                <input id="password" name="password" type="password" required />
+        </label>
+        <input type="submit" value="Log in" />
+        <p><a href="password-reset-page.html">Forgot your password?</a></p>
+        <p><a href="signup.html">Don't have an account?</a></p>
+      </fieldset>
+    </form>
+  </main>
+
+  <section class="bottom-bar">
     <div class="divider"></div>
-    
-    <div class="side-bar"></div>
-    
-    <main>
-      <form>
-        <fieldset>
-          <label for="nickname">       Login: <input id="nickname" name="nickname" type="text" required /></label>
-          <label for="password">Password: <input id="password" name="password" type="password" required /></label>
-          <input type="submit" value="Log in" />
-          <p><a href="password-reset-page.html">Forgot your password?</a></p>
-          <p><a href="signup.html">Don't have an account?</a></p>
-        </fieldset>
-      </form>
-    </main>
-    
-    <section class="bottom-bar">
-      <div class="divider"></div>
-    </section>
-    
-  </body>
+  </section>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const backend_url = "https://autowiki.uk/api/login";
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const response = await fetch(backend_url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Login failed");
+        }
+
+        const data = await response.json();
+
+        
+        localStorage.setItem("auth_token", data.token);
+        localStorage.setItem("user_email", email);
+        localStorage.setItem("isLoggedIn", "true");
+
+        
+        window.location.href = "index.html";
+
+      } catch (error) {
+        console.error("Login error:", error);
+        alert(error.message || "An error occurred during login");
+      }
+    });
+
+   
+    window.addEventListener("DOMContentLoaded", () => {
+      if (localStorage.getItem("auth_token") && localStorage.getItem("isLoggedIn") === "true") {
+        window.location.href = "index.html";
+      }
+    });
+  </script>
+</body>
 </html>
