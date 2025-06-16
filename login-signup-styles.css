@@ -76,6 +76,15 @@ a:hover{
   text-decoration: none;
 }
 
+h1 a {
+  color: white;
+}
+
+h1 a:hover, h1 a:active, h1 a:visited {
+  color: white;
+  text-decoration: none;
+}
+
 /* top, bottom and side bars */
 
 .top-bar, .bottom-bar{
