@@ -19,7 +19,7 @@ jobs:
 
       - name: SSH and Deploy
         run: |
-          scp -o StrictHostKeyChecking=no -r ./ root@${{ secrets.PRODUCTION_IP }}::/var/www/html
+          scp -o StrictHostKeyChecking=no -r ./ root@${{ secrets.PRODUCTION_IP }}:/var/www/html
           ssh -o StrictHostKeyChecking=no root@${{ secrets.PRODUCTION_IP }} << EOF
             chown -R www-data:www-data /var/www/html
           EOF
