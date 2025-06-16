@@ -12,6 +12,9 @@ jobs:
     name: Deploy to production server
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        name: Repository checkout
+
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
