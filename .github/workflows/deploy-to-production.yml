@@ -22,7 +22,10 @@ jobs:
 
       - name: SSH and Deploy
         run: |
+          rm -rf ./git && rm -rf ./github
           scp -o StrictHostKeyChecking=no -r ./ root@${{ secrets.PRODUCTION_IP }}:/var/www/html
           ssh -o StrictHostKeyChecking=no root@${{ secrets.PRODUCTION_IP }} << EOF
+            cd /var/www/html
+            ls -la
             chown -R www-data:www-data /var/www/html
           EOF
