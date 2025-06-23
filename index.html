@@ -11,9 +11,7 @@
 <body>
   <div class="sticky">
     <section class="top-bar">
-      <div class="sign-buttons" id="auth-buttons">
-        
-      </div>
+      <div class="sign-buttons" id="auth-buttons"></div>
     </section>
     <div class="divider"></div>
   </div>
@@ -25,10 +23,28 @@
       <img src="stock-car-1.jpg" alt="red car image">
       <div class="header-text">
         <h1>AutoWiki - Your car wiki</h1>
-        <p>AutoWiki is a new and efficent personal road vehicle database with robust searching and sorting functionality. It's creators are a group of first-year students united by love for programming and a wish <span class="mid-text-small">to get a good mark</span>. AutoWiki allows it's users to search and sort by any specs imaginable using our database! AutowikiDatabase is a product of sweat and tears of our datascientists, who pulled all-nighters just to make it a reality. Enjoy your search!</p>
+        <p>AutoWiki is a new and efficient personal road vehicle database with robust searching and sorting functionality. It's creators are a group of first-year students united by love for programming and a wish <span class="mid-text-small">to get a good mark</span>. AutoWiki allows its users to search and sort by any specs imaginable using our database! AutowikiDatabase is a product of sweat and tears of our data scientists, who pulled all-nighters just to make it a reality. Enjoy your search!</p>
       </div>
       <div class="divider"></div>
     </header>
+
+    <section class="sorting-controls">
+      <label for="sortOption">Sort by:</label>
+      <select id="sortOption">
+        <option value="">-- Select --</option>
+        <option value="PriceBetween">Price</option>
+        <option value="EngineDisplacementBetween">Engine Displacement</option>
+        <option value="EngineTorqueBetween">Engine Torque</option>
+        <option value="NumberOfSeatsBetween">Number of Seats</option>
+        <option value="Manufacturer">Manufacturer</option>
+        <option value="BodyType">Body Type</option>
+      </select>
+      <input type="text" id="stringValue" placeholder="Value (if text)">
+      <input type="number" id="minValue" placeholder="Min (if number)">
+      <input type="number" id="maxValue" placeholder="Max (if number)">
+      <button id="sortBtn">Sort</button>
+      <div class="divider"></div>
+    </section>
 
     <section>
       <table>
@@ -44,12 +60,9 @@
             <th>Photo</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="carsTableBody">
           <tr>
             <td>Example</td><td>3982 cm3</td><td>$218,400</td><td>5</td><td>760 Nm</td><td>Luxury Hatchback</td><td>Mercedes Benz</td><td><img src="stock-car-1.jpg" alt="car image"></td>
-          </tr>
-          <tr>
-            <td>put-value-here</td><td>put-value-here</td><td>put-value-here</td><td>put-value-here</td><td>put-value-here</td><td>put-value-here</td><td>put-value-here</td><td><img src="put-image-here" alt="car image"></td>
           </tr>
         </tbody>
       </table>
@@ -60,7 +73,6 @@
     <div class="divider"></div>
   </section>
 
-  
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const authButtons = document.getElementById("auth-buttons");
@@ -70,7 +82,6 @@
         authButtons.innerHTML = `
           <button id="logoutBtn">Log out</button>
         `;
-
         document.getElementById("logoutBtn").addEventListener("click", () => {
           localStorage.removeItem("isLoggedIn");
           location.reload();
@@ -81,9 +92,132 @@
           <a href="signup.html"><button>Sign up</button></a>
         `;
       }
+
+      loadCars();
+
+      const sortBtn = document.getElementById("sortBtn");
+      sortBtn.addEventListener("click", sortCars);
     });
+
+    function loadCars() {
+      fetch('https://autowiki.uk/api/carlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        updateCarTable(data.cars || []);
+      })
+      .catch(err => {
+        console.error("Error loading cars:", err);
+        alert("Failed to load cars. Please try again later.");
+      });
+    }
+
+    function sortCars() {
+      const sortingOption = document.getElementById("sortOption").value;
+      const stringValue = document.getElementById("stringValue").value.trim();
+      const minValue = document.getElementById("minValue").value;
+      const maxValue = document.getElementById("maxValue").value;
+
+      if (!sortingOption) {
+        alert("Please select a sorting option.");
+        return;
+      }
+
+      const requestBody = {
+        sortimportlen: sortingOption,
+        stringvalue: stringValue || "",
+        matNameValue: minValue ? parseFloat(minValue) : 0,
+        maxNameValue: maxValue ? parseFloat(maxValue) : 0
+      };
+
+      const isTextBased = sortingOption === "Manufacturer" || sortingOption === "BodyType";
+      
+      if (isTextBased) {
+        if (!stringValue) {
+          alert("Please enter a value to search for.");
+          return;
+        }
+      } else {
+        if (minValue === "" && maxValue === "") {
+          alert("Please enter a minimum and/or maximum value.");
+          return;
+        }
+      }
+
+      console.log("Sending sorting request:", requestBody);
+
+      fetch("https://autowiki.uk/api/sortcars", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(requestBody)
+      })
+      .then(async response => {
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `Server error ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log("Received sorted cars:", data);
+        
+        if (!Array.isArray(data)) {
+          throw new Error("Invalid response format from server");
+        }
+
+       
+        const sortedCars = data.map(item => ({
+          model: item.model || "N/A",
+          engineDisplacement: item.engineDisplayAccount || 0,
+          price: item.price || 0,
+          numberOfSeats: item.makerOfBoost || 0,
+          engineTorque: item.engineName || 0,
+          bodyType: item.modyType || "N/A",
+          manufacturer: item.readdicturer || "N/A",
+          imageUrl: item.imagesn || "stock-car-1.jpg"
+        }));
+
+        updateCarTable(sortedCars);
+      })
+      .catch(err => {
+        console.error("Sorting error:", err);
+        alert(`Failed to sort cars: ${err.message}`);
+      });
+    }
+
+    function updateCarTable(cars) {
+      const tbody = document.getElementById("carsTableBody");
+      tbody.innerHTML = "";
+
+      if (cars.length === 0) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td colspan="8" style="text-align: center;">No cars found</td>`;
+        tbody.appendChild(row);
+        return;
+      }
+
+      cars.forEach(car => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${car.model}</td>
+          <td>${car.engineDisplacement} cm³</td>
+          <td>$${car.price.toLocaleString()}</td>
+          <td>${car.numberOfSeats}</td>
+          <td>${car.engineTorque} Nm</td>
+          <td>${car.bodyType}</td>
+          <td>${car.manufacturer}</td>
+          <td><img src="${car.imageUrl}" alt="car image" width="100"></td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
   </script>
-
 </body>
-
 </html>

@@ -111,3 +111,14 @@ html{
   position: relative;
   top: -13px;
 }
+
+.sorting-controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: center; 
+  align-items: center;     
+  gap: 10px;               
+  margin: 20px 0;
+  flex-wrap: wrap;         
+  text-align: center;
+}
