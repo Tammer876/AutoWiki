@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="index-styles.css" />
   <title>AutoWiki - Your car wiki</title>
 </head>
-
 <body>
   <div class="sticky">
     <section class="top-bar">
@@ -23,13 +21,13 @@
       <img src="stock-car-1.jpg" alt="red car image">
       <div class="header-text">
         <h1>AutoWiki - Your car wiki</h1>
-        <p>AutoWiki is a new and efficient personal road vehicle database...</p>
+        <p>AutoWiki is a new and efficient personal road vehicle database with robust searching and sorting functionality. Its creators are a group of first-year students united by love for programming and a wish to get a good mark. AutoWiki allows its users to search and sort by any specs imaginable using our database! AutowikiDatabase is a product of sweat and tears of our data scientists, who pulled all-nighters just to make it a reality. Enjoy your search!</p>
       </div>
       <div class="divider"></div>
     </header>
 
     <section class="sorting-controls">
-      <label for="sortOption">Sort by:</label>
+      <label for="sortOption">Search by:</label>
       <select id="sortOption">
         <option value="">-- Select --</option>
         <option value="PriceBetween">Price</option>
@@ -39,10 +37,11 @@
         <option value="Manufacturer">Manufacturer</option>
         <option value="BodyType">Body Type</option>
       </select>
-      <input type="text" id="stringValue" placeholder="Value (if text)">
-      <input type="number" id="minValue" placeholder="Min (if number)">
-      <input type="number" id="maxValue" placeholder="Max (if number)">
-      <button id="sortBtn">Sort</button>
+      <input type="text" id="stringValue" placeholder="Text value" style="display: none;">
+      <input type="number" id="minValue" placeholder="Min" style="display: none;">
+      <input type="number" id="maxValue" placeholder="Max" style="display: none;">
+      <button id="sortBtn">Search</button>
+      <button id="resetBtn">Reset</button>
       <div class="divider"></div>
     </section>
 
@@ -87,50 +86,64 @@
         `;
       }
 
-      loadCars();
+      document.getElementById("sortOption").addEventListener("change", handleFieldDisplay);
       document.getElementById("sortBtn").addEventListener("click", sortCars);
+      document.getElementById("resetBtn").addEventListener("click", resetFilters);
+
+      loadCars();
     });
+
+    const TEXT_FIELDS = ["Manufacturer", "BodyType"];
+
+    function handleFieldDisplay() {
+      const sortingOption = document.getElementById("sortOption").value;
+      const isText = TEXT_FIELDS.includes(sortingOption);
+
+      document.getElementById("stringValue").style.display = isText ? "inline-block" : "none";
+      document.getElementById("minValue").style.display = isText ? "none" : "inline-block";
+      document.getElementById("maxValue").style.display = isText ? "none" : "inline-block";
+    }
 
     function loadCars() {
       fetch('https://autowiki.uk/api/carlist', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       })
-      .then(res => res.json())
-      .then(data => {
-        const cars = Array.isArray(data) ? data : data.cars || [];
-        updateCarTable(cars);
-      })
-      .catch(err => {
-        console.error("Error loading cars:", err);
-        alert("Failed to load cars.");
-      });
+        .then(async res => {
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`API error: ${res.status} ${text}`);
+          }
+          const text = await res.text();
+          return text ? JSON.parse(text) : [];
+        })
+        .then(data => {
+          const cars = Array.isArray(data) ? data : data.cars || [];
+          updateCarTable(cars);
+        })
+        .catch(err => {
+          console.error("Error loading cars:", err);
+          alert("Failed to load cars.");
+        });
     }
 
     function sortCars() {
       const sortingOption = document.getElementById("sortOption").value;
       const stringValue = document.getElementById("stringValue").value.trim();
-      const minValue = document.getElementById("minValue").value;
-      const maxValue = document.getElementById("maxValue").value;
+      const minValueRaw = document.getElementById("minValue").value;
+      const maxValueRaw = document.getElementById("maxValue").value;
 
-      if (!sortingOption) {
-        alert("Please select a sorting option.");
-        return;
-      }
+      if (!sortingOption) return alert("Please select a sorting option.");
 
-      const isTextBased = sortingOption === "Manufacturer" || sortingOption === "BodyType";
-      if (isTextBased && !stringValue) {
-        alert("Please enter a text value.");
-        return;
-      }
+      const isTextBased = TEXT_FIELDS.includes(sortingOption);
+      if (isTextBased && !stringValue) return alert("Please enter a text value.");
+      if (!isTextBased && minValueRaw === "" && maxValueRaw === "") return alert("Please enter a min or max.");
 
       const requestBody = {
-        sortingOption: sortingOption,
+        sortingOption,
         stringValue: isTextBased ? stringValue : "",
-        minimumValue: isTextBased ? 0 : parseFloat(minValue || 0),
-        maximumValue: isTextBased ? 0 : parseFloat(maxValue || 0)
+        minimumValue: isTextBased ? null : (minValueRaw !== "" ? parseFloat(minValueRaw) : null),
+        maximumValue: isTextBased ? null : (maxValueRaw !== "" ? parseFloat(maxValueRaw) : null)
       };
 
       fetch('https://autowiki.uk/api/sortcars', {
@@ -138,21 +151,36 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody)
       })
-      .then(res => res.json())
-      .then(data => {
-        const sorted = data.sortedCars || [];
-        updateCarTable(sorted);
-      })
-      .catch(err => {
-        console.error("Error during sorting:", err);
-        alert("Sorting failed. Please try again.");
-      });
+        .then(async res => {
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`API error: ${res.status} ${text}`);
+          }
+          const text = await res.text();
+          return JSON.parse(text);
+        })
+        .then(data => {
+          const sorted = data.sortedCars || [];
+          updateCarTable(sorted);
+        })
+        .catch(err => {
+          console.error("Error during sorting:", err);
+          alert("Sorting failed. Please try again.");
+        });
     }
-    
+
+    function resetFilters() {
+      document.getElementById("sortOption").value = "";
+      document.getElementById("stringValue").value = "";
+      document.getElementById("minValue").value = "";
+      document.getElementById("maxValue").value = "";
+      handleFieldDisplay();
+      loadCars();
+    }
+
     function updateCarTable(cars) {
       const tbody = document.getElementById("carsTableBody");
       tbody.innerHTML = "";
-
       cars.forEach(car => {
         const row = document.createElement("tr");
         row.innerHTML = `
@@ -170,5 +198,4 @@
     }
   </script>
 </body>
-
 </html>
