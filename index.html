@@ -67,19 +67,43 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const authButtons = document.getElementById("auth-buttons");
-      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+      const token = localStorage.getItem("token");
 
-      if (isLoggedIn) {
-        authButtons.innerHTML = `<button id="logoutBtn">Log out</button>`;
-        document.getElementById("logoutBtn").addEventListener("click", () => {
-          localStorage.removeItem("isLoggedIn");
-          location.reload();
-        });
+      if (!token) {
+        showLoginButtons();
       } else {
+        fetch("https://autowiki.uk/api/me", {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + token
+          }
+        })
+        .then(res => {
+          if (!res.ok) throw new Error("Unauthorized");
+          return res.json();
+        })
+        .then(() => {
+          showLogoutButton();
+        })
+        .catch(() => {
+          localStorage.removeItem("token");
+          showLoginButtons();
+        });
+      }
+
+      function showLoginButtons() {
         authButtons.innerHTML = `
           <a href="login.html"><button>Log in</button></a>
           <a href="signup.html"><button>Sign up</button></a>
         `;
+      }
+
+      function showLogoutButton() {
+        authButtons.innerHTML = `<button id="logoutBtn">Log out</button>`;
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+          localStorage.removeItem("token");
+          location.reload();
+        });
       }
 
       document.getElementById("sortOption").addEventListener("change", handleFieldDisplay);
@@ -180,13 +204,11 @@
       cars.forEach(car => {
         const row = document.createElement("tr");
         row.innerHTML = `
-        <td>
-          <a href="entry.html?model=${encodeURIComponent(car.model)}">
-            ${car.model || "-"}
-          </a>
-        </td>
-
-          <td>${car.model || "-"}</td>
+          <td>
+            <a href="entry.html?model=${encodeURIComponent(car.model)}">
+              ${car.model || "-"}
+            </a>
+          </td>
           <td>${car.engineDisplacement || "-"} cm³</td>
           <td>$${car.price || "-"}</td>
           <td>${car.numberOfSeats || "-"}</td>
