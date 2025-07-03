@@ -121,7 +121,10 @@
       }
 
       fetch('https://autowiki.uk/api/carlist', {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       })
         .then(async res => {
           if (!res.ok) {
