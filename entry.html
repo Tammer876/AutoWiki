@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="entry-styles.css" />
   <title>AutoWiki -insert-car-model-</title>
 </head>
-  
+
 <body>
   <div class="sticky">
     <section class="top-bar">
@@ -18,69 +18,171 @@
     </section>
     <div class="divider"></div>
   </div>
-  
+
   <div class="side-bar"></div>
-  
+
   <main>
     <table>
-
       <tr>
         <th>-model-name- specs:</th>
-<img src="stock-car-1.jpg" alt="red car image"/>
+      </tr>
+      <tr>
+        <td colspan="2"><img src="stock-car-1.jpg" alt="red car image" /></td>
       </tr>
       <tr><td>Manufacturer: -manufacturer-</td></tr>
       <tr><td>Production time: -start-year- - -end-year-</td></tr>
       <tr><td>Price: -price-</td></tr>
     </table>
 
-     <table>
-       <tr>
-         <th>Body:</th>
-         <th>Engine/Wheelbase:</th>
-       </tr>
-       <tr>
-         <td>Bodytype: -bodytype-</td>
-         <td>Fuel type: -fuel-type-</td>
-       </tr>
-       <tr>
-         <td>Number of seats: -n'o'seats</td>
-         <td>Gearbox: -gearbox-</td>
-       </tr>
-       <tr>
-         <td>Number of doors: -n'o'doors-</td>
-         <td>Drivewheels: -drivewheels-</td>
-       </tr>
-       <tr>
-         <td>Length: -length-</td>
-         <td>Horsepower: -hp-</td>
-       </tr>
-       <tr>
-         <td>Width: -width-</td>
-         <td>Weight per hp: -weight-per-hp-</td>
-       </tr>
-       <tr>
-         <td>Height: -height-</td>
-         <td>Maximum torque: -max-torque-</td>
-       </tr>
-       <tr>
-         <td>Weight: -weight-</td>
-         <td>Engine displacement: -engine-disp-</td>
-       </tr>
-       <tr>
-         <td>Top speed: -top-speed-</td>
-         <td></td>
-       </tr>
-       <tr>
-         <td>Acceleration to 100km/h: -acceleration-</td>
-         <td></td>
-       </tr>
-     </table>
+    <table>
+      <tr>
+        <th>Body:</th>
+        <th>Engine/Wheelbase:</th>
+      </tr>
+      <tr>
+        <td>Bodytype: -bodytype-</td>
+        <td>Fuel type: -fuel-type-</td>
+      </tr>
+      <tr>
+        <td>Number of seats: -n'o'seats-</td>
+        <td>Gearbox: -gearbox-</td>
+      </tr>
+      <tr>
+        <td>Number of doors: -n'o'doors-</td>
+        <td>Drivewheels: -drivewheels-</td>
+      </tr>
+      <tr>
+        <td>Length: -length-</td>
+        <td>Horsepower: -hp-</td>
+      </tr>
+      <tr>
+        <td>Width: -width-</td>
+        <td>Weight per hp: -weight-per-hp-</td>
+      </tr>
+      <tr>
+        <td>Height: -height-</td>
+        <td>Maximum torque: -max-torque-</td>
+      </tr>
+      <tr>
+        <td>Weight: -weight-</td>
+        <td>Engine displacement: -engine-disp-</td>
+      </tr>
+      <tr>
+        <td>Top speed: -top-speed-</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Acceleration to 100km/h: -acceleration-</td>
+        <td></td>
+      </tr>
+    </table>
   </main>
-  
+
   <section class="bottom-bar">
     <div class="divider"></div>
   </section>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
   
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert("You must be logged in.");
+        window.location.href = 'login.html';
+        return;
+      }
+
+      fetch('https://autowiki.uk/api/checkAuth', {
+        method: 'GET',
+        headers: {
+          Authorization: 'Bearer ' + token
+        }
+      })
+        .then(res => {
+          if (res.status === 401) {
+            alert("Session expired. Please log in again.");
+            window.location.href = 'login.html';
+          } else {
+            
+            loadCarData();
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Could not verify authentication.");
+          window.location.href = 'login.html';
+        });
+    });
+
+    function loadCarData() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const modelName = urlParams.get("model");
+      if (!modelName) {
+        alert("No car model specified.");
+        return;
+      }
+
+      fetch('https://autowiki.uk/api/carlist', {
+        method: 'POST'
+      })
+        .then(async res => {
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`API error: ${res.status} ${text}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          const car = data.cars.find(c => c.model.toLowerCase() === modelName.toLowerCase());
+          if (!car) {
+            alert(`Car model "${modelName}" not found.`);
+            return;
+          }
+          populateCarPage(car);
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Could not load car details.");
+        });
+    }
+
+    function populateCarPage(car) {
+      document.title = `AutoWiki - ${car.model}`;
+      document.querySelector("th").innerHTML = `${car.model} specs:`;
+      document.querySelector("img").src = car.imageUrl || "stock-car-1.jpg";
+
+      const rows = document.querySelectorAll("main table:nth-of-type(1) tr");
+      rows[2].querySelector("td").textContent = `Manufacturer: ${car.manufacturer || "-"}`;
+      rows[3].querySelector("td").textContent = `Production time: ${car.productionStartYear || "-"} - ${car.productionEndYear || "-"}`;
+      rows[4].querySelector("td").textContent = `Price: $${car.price || "-"}`;
+
+      const rows2 = document.querySelectorAll("main table:nth-of-type(2) tr");
+      rows2[1].children[0].textContent = `Bodytype: ${car.bodyType || "-"}`;
+      rows2[1].children[1].textContent = `Fuel type: ${car.fuelType || "-"}`;
+
+      rows2[2].children[0].textContent = `Number of seats: ${car.numberOfSeats || "-"}`;
+      rows2[2].children[1].textContent = `Gearbox: ${car.gearType || "-"}`;
+
+      rows2[3].children[0].textContent = `Number of doors: ${car.numberOfDoors || "-"}`;
+      rows2[3].children[1].textContent = `Drivewheels: ${car.driveWheelConfiguration || "-"}`;
+
+      rows2[4].children[0].textContent = `Length: ${car.length || "-"} mm`;
+      rows2[4].children[1].textContent = `Horsepower: ${car.enginePower || "-"}`;
+
+      rows2[5].children[0].textContent = `Width: ${car.width || "-"} mm`;
+      rows2[5].children[1].textContent = `Weight per hp: ${car.weightPerHP || "-"}`;
+
+      rows2[6].children[0].textContent = `Height: ${car.height || "-"} mm`;
+      rows2[6].children[1].textContent = `Maximum torque: ${car.engineTorque || "-"}`;
+
+      rows2[7].children[0].textContent = `Weight: ${car.weight || "-"} kg`;
+      rows2[7].children[1].textContent = `Engine displacement: ${car.engineDisplacement || "-"} cm³`;
+
+      rows2[8].children[0].textContent = `Top speed: ${car.topSpeed || "-"} km/h`;
+      rows2[9].children[0].textContent = `Acceleration to 100km/h: ${car.accelerationToHundred || "-"} sec`;
+    }
+  </script>
+
 </body>
-  
+
 </html>

@@ -184,6 +184,12 @@
       cars.forEach(car => {
         const row = document.createElement("tr");
         row.innerHTML = `
+        <td>
+          <a href="entry.html?model=${encodeURIComponent(car.model)}">
+            ${car.model || "-"}
+          </a>
+        </td>
+
           <td>${car.model || "-"}</td>
           <td>${car.engineDisplacement || "-"} cm³</td>
           <td>$${car.price || "-"}</td>
