@@ -6,14 +6,93 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="entry-styles.css" />
   <title>AutoWiki -insert-car-model-</title>
+  <style>
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    
+    .modal-content {
+      background-color: #fefefe;
+      margin: 10% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 600px;
+      border-radius: 8px;
+    }
+    
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .close:hover {
+      color: black;
+    }
+    
+    #editForm {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    #editForm div {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    #editForm label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    #editForm input {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    #submitChanges {
+      grid-column: span 2;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    
+    #submitChanges:hover {
+      background-color: #45a049;
+    }
+    
+    #proposeChangesBtn, #logoutBtn {
+      margin-left: 10px;
+    }
+  </style>
 </head>
   
 <body>
   <div class="sticky">
     <section class="top-bar">
       <div class="sign-buttons">
-        <a href="login.html"><button>Log in</button></a>
-        <a href="signup.html"><button>Sign up</button></a>
+        <a href="login.html"><button id="loginBtn">Log in</button></a>
+        <a href="signup.html"><button id="signupBtn">Sign up</button></a>
+        <button id="logoutBtn" style="display: none;">Log out</button>
+        <button id="proposeChangesBtn" style="display: none;">Propose Changes</button>
       </div>
     </section>
     <div class="divider"></div>
@@ -23,66 +102,80 @@
   
   <main>
     <table>
-
       <tr>
         <th>-model-name- specs:</th>
-<img src="stock-car-1.jpg" alt="red car image"/>
+        <img src="stock-car-1.jpg" alt="red car image"/>
       </tr>
       <tr><td>Manufacturer: -manufacturer-</td></tr>
       <tr><td>Production time: -start-year- - -end-year-</td></tr>
       <tr><td>Price: -price-</td></tr>
     </table>
 
-     <table>
-       <tr>
-         <th>Body:</th>
-         <th>Engine/Wheelbase:</th>
-       </tr>
-       <tr>
-         <td>Bodytype: -bodytype-</td>
-         <td>Fuel type: -fuel-type-</td>
-       </tr>
-       <tr>
-         <td>Number of seats: -n'o'seats</td>
-         <td>Gearbox: -gearbox-</td>
-       </tr>
-       <tr>
-         <td>Number of doors: -n'o'doors-</td>
-         <td>Drivewheels: -drivewheels-</td>
-       </tr>
-       <tr>
-         <td>Length: -length-</td>
-         <td>Horsepower: -hp-</td>
-       </tr>
-       <tr>
-         <td>Width: -width-</td>
-         <td>Weight per hp: -weight-per-hp-</td>
-       </tr>
-       <tr>
-         <td>Height: -height-</td>
-         <td>Maximum torque: -max-torque-</td>
-       </tr>
-       <tr>
-         <td>Weight: -weight-</td>
-         <td>Engine displacement: -engine-disp-</td>
-       </tr>
-       <tr>
-         <td>Top speed: -top-speed-</td>
-         <td></td>
-       </tr>
-       <tr>
-         <td>Acceleration to 100km/h: -acceleration-</td>
-         <td></td>
-       </tr>
-     </table>
+    <table>
+      <tr>
+        <th>Body:</th>
+        <th>Engine/Wheelbase:</th>
+      </tr>
+      <tr>
+        <td>Bodytype: -bodytype-</td>
+        <td>Fuel type: -fuel-type-</td>
+      </tr>
+      <tr>
+        <td>Number of seats: -n'o'seats</td>
+        <td>Gearbox: -gearbox-</td>
+      </tr>
+      <tr>
+        <td>Number of doors: -n'o'doors-</td>
+        <td>Drivewheels: -drivewheels-</td>
+      </tr>
+      <tr>
+        <td>Length: -length-</td>
+        <td>Horsepower: -hp-</td>
+      </tr>
+      <tr>
+        <td>Width: -width-</td>
+        <td>Weight per hp: -weight-per-hp-</td>
+      </tr>
+      <tr>
+        <td>Height: -height-</td>
+        <td>Maximum torque: -max-torque-</td>
+      </tr>
+      <tr>
+        <td>Weight: -weight-</td>
+        <td>Engine displacement: -engine-disp-</td>
+      </tr>
+      <tr>
+        <td>Top speed: -top-speed-</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Acceleration to 100km/h: -acceleration-</td>
+        <td></td>
+      </tr>
+    </table>
   </main>
   
   <section class="bottom-bar">
     <div class="divider"></div>
   </section>
   
+  
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Propose Changes</h2>
+      <form id="editForm"></form>
+      <button id="submitChanges">Submit Changes</button>
+    </div>
+  </div>
+
   <script>
+  let currentUser = null;
+  let currentCar = null;
+
   document.addEventListener("DOMContentLoaded", () => {
+    checkAuthStatus();
+    
     const urlParams = new URLSearchParams(window.location.search);
     const modelName = urlParams.get("model");
     if (!modelName) {
@@ -106,13 +199,146 @@
           alert(`Car model "${modelName}" not found.`);
           return;
         }
+        currentCar = car;
         populateCarPage(car);
       })
       .catch(err => {
         console.error(err);
         alert("Could not load car details.");
       });
+
+    
+    document.getElementById('proposeChangesBtn').addEventListener('click', showEditModal);
+    document.querySelector('.close').addEventListener('click', () => {
+      document.getElementById('editModal').style.display = 'none';
+    });
+    document.getElementById('submitChanges').addEventListener('click', submitChanges);
+    document.getElementById('logoutBtn').addEventListener('click', logout);
   });
+
+  function checkAuthStatus() {
+    
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      currentUser = { token: token };
+      document.getElementById('loginBtn').style.display = 'none';
+      document.getElementById('signupBtn').style.display = 'none';
+      document.getElementById('logoutBtn').style.display = 'inline-block';
+      document.getElementById('proposeChangesBtn').style.display = 'inline-block';
+    } else {
+      document.getElementById('loginBtn').style.display = 'inline-block';
+      document.getElementById('signupBtn').style.display = 'inline-block';
+      document.getElementById('logoutBtn').style.display = 'none';
+      document.getElementById('proposeChangesBtn').style.display = 'none';
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem('authToken');
+    currentUser = null;
+    checkAuthStatus();
+    alert('You have been logged out.');
+  }
+
+  function showEditModal() {
+    if (!currentUser) {
+      alert('Please log in to propose changes.');
+      return;
+    }
+
+    const form = document.getElementById('editForm');
+    form.innerHTML = '';
+    
+   
+    const fields = [
+      { id: 'manufacturer', label: 'Manufacturer', value: currentCar.manufacturer || '' },
+      { id: 'productionStartYear', label: 'Production Start Year', value: currentCar.productionStartYear || '' },
+      { id: 'productionEndYear', label: 'Production End Year', value: currentCar.productionEndYear || '' },
+      { id: 'price', label: 'Price ($)', value: currentCar.price || '' },
+      { id: 'bodyType', label: 'Body Type', value: currentCar.bodyType || '' },
+      { id: 'fuelType', label: 'Fuel Type', value: currentCar.fuelType || '' },
+      { id: 'numberOfSeats', label: 'Number of Seats', value: currentCar.numberOfSeats || '' },
+      { id: 'gearType', label: 'Gearbox', value: currentCar.gearType || '' },
+      { id: 'numberOfDoors', label: 'Number of Doors', value: currentCar.numberOfDoors || '' },
+      { id: 'driveWheelConfiguration', label: 'Drivewheels', value: currentCar.driveWheelConfiguration || '' },
+      { id: 'length', label: 'Length (mm)', value: currentCar.length || '' },
+      { id: 'enginePower', label: 'Horsepower', value: currentCar.enginePower || '' },
+      { id: 'width', label: 'Width (mm)', value: currentCar.width || '' },
+      { id: 'weightPerHP', label: 'Weight per HP', value: currentCar.weightPerHP || '' },
+      { id: 'height', label: 'Height (mm)', value: currentCar.height || '' },
+      { id: 'engineTorque', label: 'Maximum Torque', value: currentCar.engineTorque || '' },
+      { id: 'weight', label: 'Weight (kg)', value: currentCar.weight || '' },
+      { id: 'engineDisplacement', label: 'Engine Displacement (cm³)', value: currentCar.engineDisplacement || '' },
+      { id: 'topSpeed', label: 'Top Speed (km/h)', value: currentCar.topSpeed || '' },
+      { id: 'accelerationToHundred', label: 'Acceleration to 100km/h (sec)', value: currentCar.accelerationToHundred || '' },
+      { id: 'imageUrl', label: 'Image URL', value: currentCar.imageUrl || '' }
+    ];
+
+    fields.forEach(field => {
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <label for="${field.id}">${field.label}:</label>
+        <input type="text" id="${field.id}" name="${field.id}" value="${field.value}">
+      `;
+      form.appendChild(div);
+    });
+
+    document.getElementById('editModal').style.display = 'block';
+  }
+
+  function submitChanges() {
+    if (!currentUser || !currentCar) return;
+
+    const formData = {
+      card1: currentCar.id || 0, 
+      proposedManufacturer: document.getElementById('manufacturer').value,
+      proposedProductionStartYear: document.getElementById('productionStartYear').value,
+      proposedProductionEndYear: document.getElementById('productionEndYear').value,
+      proposedPrice: document.getElementById('price').value,
+      proposedBodyType: document.getElementById('bodyType').value,
+      proposedFuelType: document.getElementById('fuelType').value,
+      proposedNumberOfSeats: document.getElementById('numberOfSeats').value,
+      proposedGearType: document.getElementById('gearType').value,
+      proposedNumberOfDoors: document.getElementById('numberOfDoors').value,
+      proposedDriveWheelConfiguration: document.getElementById('driveWheelConfiguration').value,
+      proposedLength: document.getElementById('length').value,
+      proposedEnginePower: document.getElementById('enginePower').value,
+      proposedWidth: document.getElementById('width').value,
+      proposedWeightPerHP: document.getElementById('weightPerHP').value,
+      proposedHeight: document.getElementById('height').value,
+      proposedEngineTorque: document.getElementById('engineTorque').value,
+      proposedWeight: document.getElementById('weight').value,
+      proposedEngineDisplacement: document.getElementById('engineDisplacement').value,
+      proposedTopSpeed: document.getElementById('topSpeed').value,
+      proposedAccelerationToHundred: document.getElementById('accelerationToHundred').value,
+      proposedImageUrl: document.getElementById('imageUrl').value,
+      proposedLoginName: currentUser.username || 'anonymous' 
+    };
+
+    fetch('https://autowiki.uk/api/newarticle', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentUser.token}`
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(async res => {
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`API error: ${res.status} ${text}`);
+      }
+      return res.json();
+    })
+    .then(data => {
+      alert('Your changes have been submitted for review!');
+      document.getElementById('editModal').style.display = 'none';
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Failed to submit changes. Please try again.');
+    });
+  }
 
   function populateCarPage(car) {
     document.title = `AutoWiki - ${car.model}`;
@@ -149,8 +375,6 @@
     rows2[8].children[0].textContent = `Top speed: ${car.topSpeed || "-"} km/h`;
     rows2[9].children[0].textContent = `Acceleration to 100km/h: ${car.accelerationToHundred || "-"} sec`;
   }
-</script>
-
+  </script>
 </body>
-  
 </html>
