@@ -84,37 +84,6 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-  
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert("You must be logged in.");
-        window.location.href = 'login.html';
-        return;
-      }
-
-      fetch('https://autowiki.uk/api/checkAuth', {
-        method: 'GET',
-        headers: {
-          Authorization: 'Bearer ' + token
-        }
-      })
-        .then(res => {
-          if (res.status === 401) {
-            alert("Session expired. Please log in again.");
-            window.location.href = 'login.html';
-          } else {
-            
-            loadCarData();
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          alert("Could not verify authentication.");
-          window.location.href = 'login.html';
-        });
-    });
-
-    function loadCarData() {
       const urlParams = new URLSearchParams(window.location.search);
       const modelName = urlParams.get("model");
       if (!modelName) {
@@ -144,7 +113,7 @@
           console.error(err);
           alert("Could not load car details.");
         });
-    }
+    });
 
     function populateCarPage(car) {
       document.title = `AutoWiki - ${car.model}`;
