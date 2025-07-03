@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="entry-styles.css" />
   <title>AutoWiki -insert-car-model-</title>
   <style>
-    
+    /* Стилі для модального вікна */
     .modal {
       display: none;
       position: fixed;
@@ -79,7 +79,7 @@
       background-color: #45a049;
     }
     
-    #proposeChangesBtn, #logoutBtn {
+    #editBtn {
       margin-left: 10px;
     }
   </style>
@@ -91,8 +91,7 @@
       <div class="sign-buttons">
         <a href="login.html"><button id="loginBtn">Log in</button></a>
         <a href="signup.html"><button id="signupBtn">Sign up</button></a>
-        <button id="logoutBtn" style="display: none;">Log out</button>
-        <button id="proposeChangesBtn" style="display: none;">Propose Changes</button>
+        <button id="editBtn">Edit</button>
       </div>
     </section>
     <div class="divider"></div>
@@ -159,7 +158,7 @@
     <div class="divider"></div>
   </section>
   
-  
+  <!-- Модальне вікно для редагування -->
   <div id="editModal" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
@@ -208,12 +207,11 @@
       });
 
     
-    document.getElementById('proposeChangesBtn').addEventListener('click', showEditModal);
+    document.getElementById('editBtn').addEventListener('click', showEditModal);
     document.querySelector('.close').addEventListener('click', () => {
       document.getElementById('editModal').style.display = 'none';
     });
     document.getElementById('submitChanges').addEventListener('click', submitChanges);
-    document.getElementById('logoutBtn').addEventListener('click', logout);
   });
 
   function checkAuthStatus() {
@@ -221,64 +219,45 @@
     const token = localStorage.getItem('authToken');
     if (token) {
       currentUser = { token: token };
-      document.getElementById('loginBtn').style.display = 'none';
-      document.getElementById('signupBtn').style.display = 'none';
-      document.getElementById('logoutBtn').style.display = 'inline-block';
-      document.getElementById('proposeChangesBtn').style.display = 'inline-block';
-    } else {
-      document.getElementById('loginBtn').style.display = 'inline-block';
-      document.getElementById('signupBtn').style.display = 'inline-block';
-      document.getElementById('logoutBtn').style.display = 'none';
-      document.getElementById('proposeChangesBtn').style.display = 'none';
     }
-  }
-
-  function logout() {
-    localStorage.removeItem('authToken');
-    currentUser = null;
-    checkAuthStatus();
-    alert('You have been logged out.');
   }
 
   function showEditModal() {
     if (!currentUser) {
-      alert('Please log in to propose changes.');
+      alert('You need to have an account to propose changes. Please log in first.');
       return;
     }
 
     const form = document.getElementById('editForm');
     form.innerHTML = '';
     
-   
+  
     const fields = [
-      { id: 'manufacturer', label: 'Manufacturer', value: currentCar.manufacturer || '' },
-      { id: 'productionStartYear', label: 'Production Start Year', value: currentCar.productionStartYear || '' },
-      { id: 'productionEndYear', label: 'Production End Year', value: currentCar.productionEndYear || '' },
-      { id: 'price', label: 'Price ($)', value: currentCar.price || '' },
-      { id: 'bodyType', label: 'Body Type', value: currentCar.bodyType || '' },
-      { id: 'fuelType', label: 'Fuel Type', value: currentCar.fuelType || '' },
-      { id: 'numberOfSeats', label: 'Number of Seats', value: currentCar.numberOfSeats || '' },
-      { id: 'gearType', label: 'Gearbox', value: currentCar.gearType || '' },
-      { id: 'numberOfDoors', label: 'Number of Doors', value: currentCar.numberOfDoors || '' },
-      { id: 'driveWheelConfiguration', label: 'Drivewheels', value: currentCar.driveWheelConfiguration || '' },
-      { id: 'length', label: 'Length (mm)', value: currentCar.length || '' },
-      { id: 'enginePower', label: 'Horsepower', value: currentCar.enginePower || '' },
-      { id: 'width', label: 'Width (mm)', value: currentCar.width || '' },
-      { id: 'weightPerHP', label: 'Weight per HP', value: currentCar.weightPerHP || '' },
-      { id: 'height', label: 'Height (mm)', value: currentCar.height || '' },
-      { id: 'engineTorque', label: 'Maximum Torque', value: currentCar.engineTorque || '' },
-      { id: 'weight', label: 'Weight (kg)', value: currentCar.weight || '' },
-      { id: 'engineDisplacement', label: 'Engine Displacement (cm³)', value: currentCar.engineDisplacement || '' },
-      { id: 'topSpeed', label: 'Top Speed (km/h)', value: currentCar.topSpeed || '' },
-      { id: 'accelerationToHundred', label: 'Acceleration to 100km/h (sec)', value: currentCar.accelerationToHundred || '' },
-      { id: 'imageUrl', label: 'Image URL', value: currentCar.imageUrl || '' }
+      { id: 'proposableBodyType', label: 'Body Type', value: currentCar.bodyType || '' },
+      { id: 'proposableDictionary', label: 'Dictionary', value: '' },
+      { id: 'proposableType', label: 'Type', value: '' },
+      { id: 'proposableAllType', label: 'All Type', value: '' },
+      { id: 'proposableGlobalPlacement', label: 'Global Placement', value: 0 },
+      { id: 'proposableDataMeta', label: 'Data Meta', value: 0 },
+      { id: 'proposableStaticMember', label: 'Static Member', value: 0 },
+      { id: 'proposableMapData', label: 'Map Data', value: 0 },
+      { id: 'proposableIndexName', label: 'Index Name', value: 0 },
+      { id: 'proposableRgt', label: 'Rgt', value: 0 },
+      { id: 'proposableInt', label: 'Int', value: 0 },
+      { id: 'proposableLat', label: 'Lat', value: 0 },
+      { id: 'proposableObject', label: 'Object', value: 0 },
+      { id: 'proposableIndirectIdentifier', label: 'Indirect Identifier', value: '' },
+      { id: 'proposableMagenta', label: 'Magenta', value: '' }
     ];
 
     fields.forEach(field => {
       const div = document.createElement('div');
       div.innerHTML = `
         <label for="${field.id}">${field.label}:</label>
-        <input type="text" id="${field.id}" name="${field.id}" value="${field.value}">
+        <input type="${typeof field.value === 'number' ? 'number' : 'text'}" 
+               id="${field.id}" 
+               name="${field.id}" 
+               value="${field.value}">
       `;
       form.appendChild(div);
     });
@@ -290,29 +269,22 @@
     if (!currentUser || !currentCar) return;
 
     const formData = {
-      card1: currentCar.id || 0, 
-      proposedManufacturer: document.getElementById('manufacturer').value,
-      proposedProductionStartYear: document.getElementById('productionStartYear').value,
-      proposedProductionEndYear: document.getElementById('productionEndYear').value,
-      proposedPrice: document.getElementById('price').value,
-      proposedBodyType: document.getElementById('bodyType').value,
-      proposedFuelType: document.getElementById('fuelType').value,
-      proposedNumberOfSeats: document.getElementById('numberOfSeats').value,
-      proposedGearType: document.getElementById('gearType').value,
-      proposedNumberOfDoors: document.getElementById('numberOfDoors').value,
-      proposedDriveWheelConfiguration: document.getElementById('driveWheelConfiguration').value,
-      proposedLength: document.getElementById('length').value,
-      proposedEnginePower: document.getElementById('enginePower').value,
-      proposedWidth: document.getElementById('width').value,
-      proposedWeightPerHP: document.getElementById('weightPerHP').value,
-      proposedHeight: document.getElementById('height').value,
-      proposedEngineTorque: document.getElementById('engineTorque').value,
-      proposedWeight: document.getElementById('weight').value,
-      proposedEngineDisplacement: document.getElementById('engineDisplacement').value,
-      proposedTopSpeed: document.getElementById('topSpeed').value,
-      proposedAccelerationToHundred: document.getElementById('accelerationToHundred').value,
-      proposedImageUrl: document.getElementById('imageUrl').value,
-      proposedLoginName: currentUser.username || 'anonymous' 
+      sensor: 'b',
+      "proposable@dictionary": document.getElementById('proposableDictionary').value,
+      "proposable@type": document.getElementById('proposableType').value,
+      "proposable@allType": document.getElementById('proposableAllType').value,
+      "proposable@globalglacement": parseInt(document.getElementById('proposableGlobalPlacement').value),
+      "proposable@data@meta=true": parseInt(document.getElementById('proposableDataMeta').value),
+      "proposable@static@member": parseInt(document.getElementById('proposableStaticMember').value),
+      "proposable@map@data": parseInt(document.getElementById('proposableMapData').value),
+      "proposable@bodyType": document.getElementById('proposableBodyType').value,
+      "proposable@index@name": parseInt(document.getElementById('proposableIndexName').value),
+      "proposable@Rgt": parseInt(document.getElementById('proposableRgt').value),
+      "proposable@int": parseInt(document.getElementById('proposableInt').value),
+      "proposable@lat": parseInt(document.getElementById('proposableLat').value),
+      "proposable@object": parseInt(document.getElementById('proposableObject').value),
+      "proposable@indirectidentifier": document.getElementById('proposableIndirectIdentifier').value,
+      "proposable@magenta": document.getElementById('proposableMagenta').value
     };
 
     fetch('https://autowiki.uk/api/newarticle', {
