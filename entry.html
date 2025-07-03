@@ -11,13 +11,9 @@
 <body>
   <div class="sticky">
     <section class="top-bar">
-      <div class="sign-buttons" id="auth-buttons">
+      <div class="sign-buttons">
         <a href="login.html"><button>Log in</button></a>
         <a href="signup.html"><button>Sign up</button></a>
-      </div>
-      <div id="user-actions" style="display: none;">
-        <button onclick="logout()">Log out</button>
-        <a href="add-article.html"><button>Add Article</button></a>
       </div>
     </section>
     <div class="divider"></div>
@@ -31,7 +27,7 @@
         <th>-model-name- specs:</th>
       </tr>
       <tr>
-        <td colspan="2"><img src="stock-car-1.jpg" alt="red car image" /></td>
+        <td colspan="2"><img src="stock-car-1.jpg" alt="car image" /></td>
       </tr>
       <tr><td>Manufacturer: -manufacturer-</td></tr>
       <tr><td>Production time: -start-year- - -end-year-</td></tr>
@@ -48,11 +44,11 @@
         <td>Fuel type: -fuel-type-</td>
       </tr>
       <tr>
-        <td>Number of seats: -n'o'seats-</td>
+        <td>Number of seats: -num-seats-</td>
         <td>Gearbox: -gearbox-</td>
       </tr>
       <tr>
-        <td>Number of doors: -n'o'doors-</td>
+        <td>Number of doors: -num-doors-</td>
         <td>Drivewheels: -drivewheels-</td>
       </tr>
       <tr>
@@ -73,11 +69,11 @@
       </tr>
       <tr>
         <td>Top speed: -top-speed-</td>
-        <td></td>
+        <td>-</td>
       </tr>
       <tr>
         <td>Acceleration to 100km/h: -acceleration-</td>
-        <td></td>
+        <td>-</td>
       </tr>
     </table>
   </main>
@@ -87,15 +83,36 @@
   </section>
 
   <script>
-    // Авторизація
     document.addEventListener("DOMContentLoaded", () => {
-      const token = localStorage.getItem("token");
-
-      if (token) {
-        document.getElementById("auth-buttons").style.display = "none";
-        document.getElementById("user-actions").style.display = "block";
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert("You must be logged in.");
+        window.location.href = 'login.html';
+        return;
       }
 
+      fetch('https://autowiki.uk/api/checkAuth', {
+        method: 'GET',
+        headers: {
+          Authorization: 'Bearer ' + token
+        }
+      })
+        .then(res => {
+          if (res.status === 401) {
+            alert("Session expired. Please log in again.");
+            window.location.href = 'login.html';
+          } else {
+            loadCarData();
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Could not verify authentication.");
+          window.location.href = 'login.html';
+        });
+    });
+
+    function loadCarData() {
       const urlParams = new URLSearchParams(window.location.search);
       const modelName = urlParams.get("model");
       if (!modelName) {
@@ -104,10 +121,7 @@
       }
 
       fetch('https://autowiki.uk/api/carlist', {
-        method: 'POST',
-        headers: {
-          'Authorization': token ? `Bearer ${token}` : undefined
-        }
+        method: 'POST'
       })
         .then(async res => {
           if (!res.ok) {
@@ -128,17 +142,17 @@
           console.error(err);
           alert("Could not load car details.");
         });
-    });
+    }
 
     function populateCarPage(car) {
       document.title = `AutoWiki - ${car.model}`;
-      document.querySelector("th").innerHTML = `${car.model} specs:`;
+      document.querySelector("th").textContent = `${car.model} specs:`;
       document.querySelector("img").src = car.imageUrl || "stock-car-1.jpg";
 
-      const rows = document.querySelectorAll("main table:nth-of-type(1) tr");
-      rows[2].querySelector("td").textContent = `Manufacturer: ${car.manufacturer || "-"}`;
-      rows[3].querySelector("td").textContent = `Production time: ${car.productionStartYear || "-"} - ${car.productionEndYear || "-"}`;
-      rows[4].querySelector("td").textContent = `Price: $${car.price || "-"}`;
+      const rows1 = document.querySelectorAll("main table:nth-of-type(1) tr");
+      rows1[2].querySelector("td").textContent = `Manufacturer: ${car.manufacturer || "-"}`;
+      rows1[3].querySelector("td").textContent = `Production time: ${car.productionStartYear || "-"} - ${car.productionEndYear || "-"}`;
+      rows1[4].querySelector("td").textContent = `Price: $${car.price || "-"}`;
 
       const rows2 = document.querySelectorAll("main table:nth-of-type(2) tr");
       rows2[1].children[0].textContent = `Bodytype: ${car.bodyType || "-"}`;
@@ -163,12 +177,10 @@
       rows2[7].children[1].textContent = `Engine displacement: ${car.engineDisplacement || "-"} cm³`;
 
       rows2[8].children[0].textContent = `Top speed: ${car.topSpeed || "-"} km/h`;
-      rows2[9].children[0].textContent = `Acceleration to 100km/h: ${car.accelerationToHundred || "-"} sec`;
-    }
+      rows2[8].children[1].textContent = `-`;
 
-    function logout() {
-      localStorage.removeItem("token");
-      window.location.reload();
+      rows2[9].children[0].textContent = `Acceleration to 100km/h: ${car.accelerationToHundred || "-"} sec`;
+      rows2[9].children[1].textContent = `-`;
     }
   </script>
 
